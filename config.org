@@ -242,3 +242,17 @@ https://github.com/doomemacs/doomemacs/blob/develop/modules/config/default/%2Bev
 
 
 #+end_src
+
+
+* Packages
+** which-key
+Will give you a nice panel when you're using keybindings
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 0.3))
+
+
+#+END_SRC
