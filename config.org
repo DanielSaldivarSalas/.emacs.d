@@ -86,25 +86,32 @@ To manage the package configuratiosn with ~use-package~ you must install it with
 Adds relative line numbers and disables it for specific modes
 #+BEGIN_SRC emacs-lisp
 
-(column-number-mode)
-(global-display-line-numbers-mode t)
 
-(defun my-setup-relative-line-numbers ()
-  (setq display-line-numbers 'relative))
+      (column-number-mode)
 
-(add-hook 'display-line-numbers-mode-hook 'my-setup-relative-line-numbers)
+  (defun my-relative-line-numbers ()
+    "Enable relative line numbers in all modes except Org-mode, Term-mode, and Shell-mode."
+    (unless (or (derived-mode-p 'org-mode)
+                (derived-mode-p 'term-mode)
+                (derived-mode-p 'treemacs-mode-hook)
+                (derived-mode-p 'eshell-mode-hook)
+                (derived-mode-p 'shell-mode))
+      (display-line-numbers-mode t)
+      (setq display-line-numbers 'visual)))
 
-(defun my-disable-line-numbers ()
-  (display-line-numbers-mode -1))
-
-(dolist (hook '(org-mode-hook
-                term-mode-hook
-                shell-mode-hook
-                treemacs-mode-hook
-                eshell-mode-hook))
-  (add-hook hook 'my-disable-line-numbers))
+  (add-hook 'find-file-hook 'my-relative-line-numbers)
+  (add-hook 'after-change-major-mode-hook 'my-relative-line-numbers)
 
 #+END_SRC
+
+** Rainbow Delimiters
+This will be useful when we are editing lisp
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+#+END_SRC
+  
 * Apperance
 #+BEGIN_SRC emacs-lisp
 (use-package doom-modeline
