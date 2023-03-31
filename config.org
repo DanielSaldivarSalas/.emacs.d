@@ -138,31 +138,57 @@ This will be useful when we are editing lisp
 #+END_SRC
 
 
-* Ivy
-#+BEGIN_SRC emacs-lisp
-(use-package ivy
-  :diminish
-  :bind (("C-s" . swiper)
-         :map ivy-minibuffer-map
-         ("TAB" . ivy-alt-done)
-         ("C-l" . ivy-alt-done)
-         ("C-j" . ivy-next-line)
-         ("C-k" . ivy-previous-line)
-         :map ivy-switch-buffer-map
-         ("C-k" . ivy-previous-line)
-         ("C-l" . ivy-done)
-         ("C-d" . ivy-switch-buffer-kill)
-         :map ivy-reverse-i-search-map
-         ("C-k" . ivy-previous-line)
-         ("C-d" . ivy-reverse-i-search-kill))
-  :config
-  (ivy-mode 1))
+* Ivy and Counsel
 
-(use-package ivy-rich
-  :ensure t
- :after (counsel)
-  :init
-  (ivy-rich-mode 1))
+NOTE: when yousuing M-x you can do M-o and d to go to the definition of a function2
+#+BEGIN_SRC emacs-lisp
+    (use-package ivy
+    :diminish
+    :bind (("C-s" . swiper)
+           :map ivy-minibuffer-map
+           ("TAB" . ivy-alt-done)
+           ("C-l" . ivy-alt-done)
+           ("C-j" . ivy-next-line)
+           ("C-k" . ivy-previous-line)
+           :map ivy-switch-buffer-map
+           ("C-k" . ivy-previous-line)
+           ("C-l" . ivy-done)
+           ("C-d" . ivy-switch-buffer-kill)
+           :map ivy-reverse-i-search-map
+           ("C-k" . ivy-previous-line)
+           ("C-d" . ivy-reverse-i-search-kill))
+    :config
+    (ivy-mode 1))
+
+
+  (use-package swiper :ensure t)
+
+  ;; Override the basic Emacs commands
+  (use-package counsel
+    :bind ; load when pressed
+    (("M-x"     . counsel-M-x)
+     ("C-s"     . swiper)
+   
+     ("C-x C-f" . counsel-find-file)
+     ("C-x C-r" . counsel-recentf)  ; search for recently edited
+     ("C-c g"   . counsel-git)      ; search for files in git repo
+     ("C-c j"   . counsel-git-grep) ; search for regexp in git repo
+     ("C-c /"   . counsel-ag)       ; Use ag for regexp
+     ("C-x l"   . counsel-locate)
+     ("C-x C-f" . counsel-find-file)
+     ("<f1> f"  . counsel-describe-function)
+     ("<f1> v"  . counsel-describe-variable)
+     ("<f1> l"  . counsel-find-library)
+     ("<f2> i"  . counsel-info-lookup-symbol)
+     ("<f2> u"  . counsel-unicode-char)
+     ("C-c C-r" . ivy-resume)))
+
+  
+  (use-package ivy-rich
+    :ensure t
+   :after (counsel)
+    :init
+    (ivy-rich-mode 1))
 
 
 
@@ -192,7 +218,7 @@ This will be useful when we are editing lisp
 
 ;; evil-collection will turn evil-mode on in many emacs modes by default
 (use-package evil-collection
-  :after evil
+  :after magit ;;only because evil-magit is only availble in evil-collection now not melpa
   :config
   (evil-collection-init))
 
@@ -219,13 +245,19 @@ https://github.com/doomemacs/doomemacs/blob/develop/modules/config/default/%2Bev
       "t"  '(:ignore t :which-key "toggles")
       "o"  '(:ignore o :which-key "code") 
       "n"  '(:ignore o :which-key "notes")
+      "b"  '(:ignore o :which-key "buffers")
+      "p"  '(:ignore o :which-key "projectile")
+      "m"  '(:ignore o :which-key "magit")
+
       "tt" '(counsel-load-theme :which-key "choose theme")
       "ff" 'find-file
+      "bs" 'counsel-switch-buffer
       "aa" 'org-agenda
       "at" 'org-time-stamp
       "as" 'org-schedule
       "ar" 'org-refile
-      "prg" 'counsel-projectile-rg
+      "ps" '(counsel-projectile-rg :which-key "Search project using rg")
+      "ms" 'magit-status
       "nf" 'org-roam-node-find
       "ni" 'org-roam-node-insert 
       "e" 'treemacs
@@ -246,7 +278,10 @@ https://github.com/doomemacs/doomemacs/blob/develop/modules/config/default/%2Bev
 
 * Packages
 ** which-key
-Will give you a nice panel when you're using keybindings
+Will give you a nice panel when you're using keybindings.
+
+It will let you know what keybinds are available as you are typing.
+
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
   :init (which-key-mode)
@@ -254,5 +289,50 @@ Will give you a nice panel when you're using keybindings
   :config
   (setq which-key-idle-delay 0.3))
 
+
+#+END_SRC
+
+* Projectile
+
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :custom ((projectile-completion-system 'ivy))
+  :bind-keymap
+  ("C-c p" . projectile-command-map)
+  :init
+  ;; NOTE: Set this to the folder where you keep your Git repos!
+  (when (file-directory-p "~/Projects/Code")
+    (setq projectile-project-search-path '("~/Projects/Code")))
+  (setq projectile-switch-project-action #'projectile-dired))
+
+(use-package counsel-projectile
+  :config (counsel-projectile-mode))
+#+END_SRC
+
+
+* Magit
+
+How to use magit
+
+
+magit-status:
+s to stage selected file
+S to stage all files
+u to unstage
+c to commit
+
+C-c C-k to exit out of the commit message buffer 
+
+
+you can press ? to see all the options you have in magit-status
+
+
+#+BEGIN_SRC emacs-lisp
+    (use-package magit
+      :after evil ;; to get evil-magit work in evil-collections
+    :custom
+    (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
 #+END_SRC
