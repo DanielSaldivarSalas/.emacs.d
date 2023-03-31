@@ -1,0 +1,237 @@
+#+AUTHOR: Daniel Saldivar
+#+TITLE: GNU Emacs Configuration
+#+PROPERTY: header-args:emacs-lisp :tangle ./config.el :mkdirp yes
+
+
+* Emacs Initialization
+
+** Package Sources
+To install packages, it is useful to c onfigure the package sources.
+
+#+BEGIN_SRC emacs-lisp
+  ;; Initializie package sources
+  (require 'package) ;; this might happen by default, but we have this just in case
+
+
+  ;; These are all the different package repositories
+  (setq package-archives '(("elpa" . "https://elpa.gnu.org/packages/")
+                           ("melpa" . "https://melpa.org/packages/")
+                           ("org" . "https://orgmode.org/elpa/")
+                           ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
+(package-initialize)
+(unless package-archive-contents
+ (package-refresh-contents))
+
+
+  
+#+END_SRC
+
+** Package configurations
+To manage the package configuratiosn with ~use-package~ you must install it with the following code snippet.
+
+~use-package~ simplifies downloading packages.
+
+#+BEGIN_SRC emacs-lisp
+   (unless (package-installed-p 'use-package)
+    (package-install 'use-package))
+
+  (require 'use-package)
+(setq use-package-always-ensure t)
+
+#+END_SRC
+
+* Defaults
+#+BEGIN_SRC emacs-lisp
+  (setq-default
+   ad-redefinition-action 'accept                   ; Silence warnings for redefinition
+   cursor-in-non-selected-windows t                 ; Hide the cursor in inactive windows
+   display-time-default-load-average nil            ; Don't display load average
+   fill-column 80                                   ; Set width for automatic line breaks
+   help-window-select t                             ; Focus new help windows when opened
+   indent-tabs-mode nil                             ; Prefer spaces over tabs
+   inhibit-startup-screen t                         ; Disable start-up screen
+   initial-scratch-message ""                       ; Empty the initial *scratch* buffer
+   kill-ring-max 128                                ; Maximum length of kill ring
+   load-prefer-newer t                              ; Prefer the newest version of a file
+   mark-ring-max 128                                ; Maximum length of mark ring
+   read-process-output-max (* 1024 1024)            ; Increase the amount of data reads from the process
+   scroll-conservatively most-positive-fixnum       ; Always scroll by one line
+   select-enable-clipboard t                        ; Merge system's and Emacs' clipboard
+   tab-width 4                                      ; Set width for tabs
+   use-package-always-ensure t                      ; Avoid the :ensure keyword for each package
+   vc-follow-symlinks t                             ; Always follow the symlinks
+   view-read-only t)                                ; Always open read-only buffers in view-mode
+  (column-number-mode 1)                            ; Show the column number
+  (fset 'yes-or-no-p 'y-or-n-p)                     ; Replace yes/no prompts with y/n
+  (global-hl-line-mode)                             ; Hightlight current line
+  (set-default-coding-systems 'utf-8)               ; Default to utf-8 encoding
+  (show-paren-mode 1)                               ; Show the parent
+  (scroll-bar-mode -1)                               ; Disable visible scrollbar
+  (tool-bar-mode -1)                                ; Disable the toolbar
+  (tooltip-mode -1)                                 ; Disable tooltips
+  (set-fringe-mode 10)                              ; Give somebreathing room
+
+  (menu-bar-mode -1)                                ; Disable the menu bar
+
+  ;; Set up the visible bell
+  (setq visible-bell t)
+
+
+
+
+#+END_SRC
+
+* General Improvements
+** Line numbers
+Adds relative line numbers and disables it for specific modes
+#+BEGIN_SRC emacs-lisp
+
+(column-number-mode)
+(global-display-line-numbers-mode t)
+
+(defun my-setup-relative-line-numbers ()
+  (setq display-line-numbers 'relative))
+
+(add-hook 'display-line-numbers-mode-hook 'my-setup-relative-line-numbers)
+
+(defun my-disable-line-numbers ()
+  (display-line-numbers-mode -1))
+
+(dolist (hook '(org-mode-hook
+                term-mode-hook
+                shell-mode-hook
+                treemacs-mode-hook
+                eshell-mode-hook))
+  (add-hook hook 'my-disable-line-numbers))
+
+#+END_SRC
+* Apperance
+#+BEGIN_SRC emacs-lisp
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1)
+  :custom ((doom-modeline-height 15)))
+
+(use-package all-the-icons
+  :ensure t)
+
+(use-package doom-themes
+  :config
+  (setq doom-themes-enabled-bold t
+	doom-themes-enabled-italic t)
+  (load-theme 'doom-palenight t)
+
+  (doom-themes-visual-bell-config)
+  (doom-themes-neotree-config)
+  (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
+  (doom-themes-treemacs-config)
+
+  (doom-themes-org-config))
+
+#+END_SRC
+
+
+* Ivy
+#+BEGIN_SRC emacs-lisp
+(use-package ivy
+  :diminish
+  :bind (("C-s" . swiper)
+         :map ivy-minibuffer-map
+         ("TAB" . ivy-alt-done)
+         ("C-l" . ivy-alt-done)
+         ("C-j" . ivy-next-line)
+         ("C-k" . ivy-previous-line)
+         :map ivy-switch-buffer-map
+         ("C-k" . ivy-previous-line)
+         ("C-l" . ivy-done)
+         ("C-d" . ivy-switch-buffer-kill)
+         :map ivy-reverse-i-search-map
+         ("C-k" . ivy-previous-line)
+         ("C-d" . ivy-reverse-i-search-kill))
+  :config
+  (ivy-mode 1))
+
+(use-package ivy-rich
+  :ensure t
+ :after (counsel)
+  :init
+  (ivy-rich-mode 1))
+
+
+
+#+END_SRC
+
+
+* Evil Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  :config
+  (evil-mode 1)
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  ;;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
+
+
+;; evil-collection will turn evil-mode on in many emacs modes by default
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+#+END_SRC
+
+* Keybindings
+** General
+
+For ideas on how to do some keybindgs, check out doomemacs keybindigns
+https://github.com/doomemacs/doomemacs/blob/develop/modules/config/default/%2Bevil-bindings.el
+
+#+begin_src emacs-lisp
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;;;; General, replacement for evil-leader ;;;;;
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (use-package general
+    :config
+    (general-create-definer my/leader-keys
+      :keymaps '(normal insert visual emacs)
+      :prefix "SPC"
+      :global-prefix "C-SPC")
+
+    (my/leader-keys
+      "t"  '(:ignore t :which-key "toggles")
+      "o"  '(:ignore o :which-key "code") 
+      "n"  '(:ignore o :which-key "notes")
+      "tt" '(counsel-load-theme :which-key "choose theme")
+      "ff" 'find-file
+      "aa" 'org-agenda
+      "at" 'org-time-stamp
+      "as" 'org-schedule
+      "ar" 'org-refile
+      "prg" 'counsel-projectile-rg
+      "nf" 'org-roam-node-find
+      "ni" 'org-roam-node-insert 
+      "e" 'treemacs
+      "cs" 'lsp-treemacs-symbols
+      "cj" 'lsp-ivy-workspace-symbol
+      "ot" '(org-babel-tangle :which-key "Tangle Code") 
+      "ol" '(org-insert-link :which-key "Insert/Edit Link")
+      "oc" 'org-capture
+      "op" 'org-set-property
+      "or" 'org-refile
+      "tag" '(counsel-org-tag :which-key "Tag todo")
+      "id" 'org-redisplay-inline-images
+      ))
+
+
+#+end_src
