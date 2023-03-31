@@ -322,6 +322,9 @@ s to stage selected file
 S to stage all files
 u to unstage
 c to commit
+P to push
+
+To commit, C-c C-c confirms the commit
 
 C-c C-k to exit out of the commit message buffer 
 
