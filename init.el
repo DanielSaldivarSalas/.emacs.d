@@ -23,7 +23,8 @@
  '(package-selected-packages
    '(use-package-ensure-system-package delight which-key vterm visual-fill-column use-package typescript-mode terraform-mode rainbow-delimiters org-superstar org-roam org-fancy-priorities org-download org-contacts neotree lsp-ui lsp-treemacs lsp-pyright lsp-ivy ivy-rich general evil-nerd-commenter evil-leader evil-collection ebdb doom-themes doom-modeline counsel-projectile company-box command-log-mode all-the-icons))
  '(warning-suppress-types
-   '(((package reinitialization))
+   '((use-package)
+     ((package reinitialization))
      ((package reinitialization))
      ((package reinitialization))
      ((package reinitialization))
