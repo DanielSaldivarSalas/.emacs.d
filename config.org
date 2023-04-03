@@ -245,34 +245,44 @@ NOTE: when usuing M-x you can do M-o and d to go to the definition of a function
 
 * Evil Mode
 #+BEGIN_SRC emacs-lisp
-  (use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  :config
-  (evil-mode 1)
-  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-  ;;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+    (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump nil)
+    (setq evil-set-undo-system 'undo-redo)
+    :config
+    (evil-mode 1)
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+    ;;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-  ;; Use visual line motions even outside of visual-line-mode buffers
-  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+    ;; Use visual line motions even outside of visual-line-mode buffers
+    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
-  (evil-set-initial-state 'messages-buffer-mode 'normal)
-  (evil-set-initial-state 'dashboard-mode 'normal))
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal))
 
 
-;; evil-collection will turn evil-mode on in many emacs modes by default
-(use-package evil-collection
-  :after magit ;;only because evil-magit is only availble in evil-collection now not melpa
-  :config
-  (evil-collection-init))
+  ;; evil-collection will turn evil-mode on in many emacs modes by default
+  (use-package evil-collection
+    :after magit ;;only because evil-magit is only availble in evil-collection now not melpa
+    :config
+    (evil-collection-init))
 
 #+END_SRC
 
-
+** Vim Redo
+#+begin_src emacs-lisp
+(use-package undo-tree
+  :ensure t
+  :after evil
+  :diminish
+  :config
+  (evil-set-undo-system 'undo-tree)
+  (global-undo-tree-mode 1))
+#+end_src
 * Keybindings
 ** General
 
@@ -463,6 +473,7 @@ you can press ? to see all the options you have in magit-status
             (setq org-agenda-files '("~/org/gtd/inbox.org"
                          "~/org/gtd/tickler.org"
                          "~/org/gtd/gtd.org"
+                         "~/org/holidays.org"
                          "~/org/birthdays.org")) ;; this will set all the files that will appear in your agenda
 
 
@@ -710,3 +721,7 @@ This will allow you to use images in orgmode
 
 
 #+end_src
+
+
+* Resources
+https://github.com/rememberYou/.emacs.d/blob/master/config.org
