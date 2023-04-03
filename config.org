@@ -3,6 +3,21 @@
 #+PROPERTY: header-args:emacs-lisp :tangle ./config.el :mkdirp yes
 
 
+* Auto Tangle
+;; Automatically tangle our Emacs.org config file when we save it
+#+begin_src emacs-lisp
+  ;; Automatically tangle our Emacs.org config file when we save it
+  (defun my/tangle-config-on-save ()
+    "Tangle the Emacs configuration file if it's being saved."
+    (when (equal (file-truename (buffer-file-name))
+                 (file-truename (expand-file-name "~/.emacs.d/config.org")))
+      (org-babel-tangle)))
+
+
+  (add-hook 'after-save-hook #'my/tangle-config-on-save)
+#+end_src
+
+
 * Emacs Initialization
 ** For Macs
  Download brew install emacs-plus ;; Do not install regular emacs from brew
@@ -11,21 +26,23 @@
 To install packages, it is useful to c onfigure the package sources.
 
 #+BEGIN_SRC emacs-lisp
-  ;; Initializie package sources
-  (require 'package) ;; this might happen by default, but we have this just in case
+    ;; Initializie package sources
+    (require 'package) ;; this might happen by default, but we have this just in case
 
 
-  ;; These are all the different package repositories
-  (setq package-archives '(("elpa" . "https://elpa.gnu.org/packages/")
-                           ("melpa" . "https://melpa.org/packages/")
-                           ("org" . "https://orgmode.org/elpa/")
-                           ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
-(package-initialize)
-(unless package-archive-contents
- (package-refresh-contents))
+    ;; These are all the different package repositories
+    (setq package-archives '(("elpa" . "https://elpa.gnu.org/packages/")
+                             ("melpa" . "https://melpa.org/packages/")
+                             ("org" . "https://orgmode.org/elpa/")
+                             ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
+  (package-initialize)
+  (unless package-archive-contents
+   (package-refresh-contents))
 
 
-  
+
+
+
 #+END_SRC
 
 ** Package configurations
@@ -34,14 +51,30 @@ To manage the package configuratiosn with ~use-package~ you must install it with
 ~use-package~ simplifies downloading packages.
 
 #+BEGIN_SRC emacs-lisp
-   (unless (package-installed-p 'use-package)
-    (package-install 'use-package))
+     (unless (package-installed-p 'use-package)
+      (package-install 'use-package))
 
-  (require 'use-package)
-(setq use-package-always-ensure t)
+    (require 'use-package)
+  (setq use-package-always-ensure t)
 
 #+END_SRC
+** Correct $PATH
+exec-path-from-shell is a useful Emacs package that copies your shell's environment variables, such as PATH, to Emacs. This can help resolve issues where Emacs doesn't have the correct environment, leading to problems like "command not found."
 
+
+#+begin_src emacs-lisp
+  
+  (use-package exec-path-from-shell
+    :ensure t
+    :init
+    (when (memq window-system '(mac ns x))
+      (exec-path-from-shell-initialize)))
+
+#+end_src
+** Open up gtd file automatically
+#+begin_src emacs-lisp
+(setq initial-buffer-choice "~/org/gtd/gtd.org")
+#+end_src
 * Defaults
 #+BEGIN_SRC emacs-lisp
   (setq-default
@@ -118,7 +151,17 @@ This will be useful when we are editing lisp
 #+BEGIN_SRC emacs-lisp
   (global-tab-line-mode t)
 #+END_SRC
-* Apperance
+** helpful
+#+begin_src emacs-lisp
+(use-package helpful
+  :ensure t
+  :bind (("C-h f" . helpful-callable)
+         ("C-h v" . helpful-variable)
+         ("C-h k" . helpful-key)
+         ("C-h F" . helpful-function)
+         ("C-h C" . helpful-command)))
+#+end_src
+** Apperance
 #+BEGIN_SRC emacs-lisp
 (use-package doom-modeline
   :ensure t
@@ -144,9 +187,9 @@ This will be useful when we are editing lisp
 #+END_SRC
 
 
-* Ivy and Counsel
+** Ivy and Counsel
 
-NOTE: when yousuing M-x you can do M-o and d to go to the definition of a function2
+NOTE: when usuing M-x you can do M-o and d to go to the definition of a function2
 #+BEGIN_SRC emacs-lisp
     (use-package ivy
     :diminish
@@ -281,8 +324,7 @@ https://github.com/doomemacs/doomemacs/blob/develop/modules/config/default/%2Bev
 
 #+end_src
 
-
-* Packages
+ 
 ** which-key
 Will give you a nice panel when you're using keybindings.
 
@@ -398,6 +440,16 @@ you can press ? to see all the options you have in magit-status
         (use-package org
             :hook (org-mode . my/org-mode-setup)
             :config
+            (require 'ob)
+            (org-babel-do-load-languages
+             'org-babel-load-languages
+             '(
+               (python . t)
+               (emacs-lisp . t)
+               ))
+            (setq org-babel-python-command "python3")
+            (setq org-confirm-babel-evaluate nil)
+
             (setq org-ellipsis " ▾"
               org-hide-emphasis-markers t)
             (setq org-agenda-start-with-log-mode t)
@@ -509,17 +561,17 @@ you can press ? to see all the options you have in magit-status
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
             ;;org-babel;;;;;;
     ;; (require 'ob-go) 
-            (org-babel-do-load-languages
-            'org-babel-load-languages
-            '((emacs-lisp . t)
-              (shell . t)
-              (terraform . t)
-              (go . t)
-              (python . t)))
+    ;;        (org-babel-do-load-languages
+      ;;      'org-babel-load-languages
+      ;;      '((emacs-lisp . t)
+        ;;      (shell . t)
+     ;;         (terraform . t)
+       ;;       (go . t)
+       ;;       (python . t)))
 
-(setq org-confirm-babel-evaluate nil)
 
-            
+
+
             (push '("conf-unix" . conf-unix) org-src-lang-modes)
             ;;;;; end org babel
 
@@ -539,7 +591,7 @@ you can press ? to see all the options you have in magit-status
 
 ** Change heading icons
 #+BEGIN_SRC emacs-lisp
-
+(setq python-shell-interpreter "/opt/homebrew/bin/python3")
   (use-package org-bullets
     :ensure t
     :hook (org-mode . org-bullets-mode)
@@ -597,33 +649,33 @@ you can press ? to see all the options you have in magit-status
 ** org-download
 This will allow you to use images in orgmode
 #+BEGIN_SRC emacs-lisp
-  (use-package org-download
-  :ensure t
-  :config
-  (require 'org-download)
-  ;; Drag and drop to Dired
-  (add-hook 'dired-mode-hook 'org-download-enable)
-  (setq org-download-method 'directory)
-  (setq-default org-download-image-dir "./img")
-(setq org-download-screenshot-method "screencapture -i %s")
+    (use-package org-download
+    :ensure t
+    :config
+    (require 'org-download)
+    ;; Drag and drop to Dired
+    (add-hook 'dired-mode-hook 'org-download-enable)
+    (setq org-download-method 'directory)
+    (setq-default org-download-image-dir "./img")
+  (setq org-download-screenshot-method "screencapture -i %s")
   (setq org-download-screenshot-file "./img/tmp.png")
-  )
+    )
 
 
-;; see images in orgmode
-(setq org-startup-with-inline-images t)
-(setq org-redisplay-inline-images t)
-(setq org-startup-with-inline-images "inlineimages")
+  ;; see images in orgmode
+  (setq org-startup-with-inline-images t)
+  (setq org-redisplay-inline-images t)
+  (setq org-startup-with-inline-images "inlineimages")
 
 
-(defun do-org-show-all-inline-images ()
-  (interactive)
-  (org-display-inline-images t t))
-(global-set-key (kbd "C-c C-x C v")
-                'do-org-show-all-inline-images)
+  (defun do-org-show-all-inline-images ()
+    (interactive)
+    (org-display-inline-images t t))
+  (global-set-key (kbd "C-c C-x C v")
+                  'do-org-show-all-inline-images)
 
 
-(setq org-image-actual-width nil)
+  (setq org-image-actual-width nil)
 
 #+END_SRC
 
@@ -637,3 +689,24 @@ This will allow you to use images in orgmode
     (add-to-list 'org-structure-template-alist '("tf" . "src terraform"))
 #+END_SRC
 
+
+
+** org-roam
+#+begin_src emacs-lisp
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory "~/org/roam")
+  (org-roam-capture-templates
+   '(("d" "default" plain
+      "%?"
+      :target (file+head "${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n l" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert))
+  :config
+  (org-roam-setup))
+
+
+#+end_src
