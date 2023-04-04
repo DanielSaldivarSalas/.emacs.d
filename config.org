@@ -602,13 +602,17 @@ you can press ? to see all the options you have in magit-status
 
 ** Change heading icons
 #+BEGIN_SRC emacs-lisp
-(setq python-shell-interpreter "/opt/homebrew/bin/python3")
-  (use-package org-bullets
-    :ensure t
-    :hook (org-mode . org-bullets-mode)
-    :config
-    (setq org-bullets-bullet-list '("◉" "○" "✸" "✿" "❀" "✼" "✻" "✤")))
-  
+    (setq python-shell-interpreter "/opt/homebrew/bin/python3")
+
+  (use-package org-superstar
+      :ensure t
+      :config
+      (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
+      (setq org-superstar-headline-bullets-list '("◉" "○" "✸" "✿" "❀" "✼" "✻" "✤"))
+      (setq org-hide-leading-stars t)
+      (setq org-superstar-special-todo-items t)
+      )
+
 #+END_SRC
 
 ** org-agenda
