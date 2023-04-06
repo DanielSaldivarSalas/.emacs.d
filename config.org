@@ -402,202 +402,203 @@ you can press ? to see all the options you have in magit-status
 ** Regular org
 #+begin_src emacs-lisp 
 
-        ;;change the size and font of headlines
-        (defun my/org-mode-setup ()
-          (org-indent-mode)
-          (variable-pitch-mode 1)
-          (visual-line-mode 1))
+          ;;change the size and font of headlines
+          (defun my/org-mode-setup ()
+            (org-indent-mode)
+            (variable-pitch-mode 1)
+            (visual-line-mode 1))
 
-        (defun my/org-font-setup ()
-          ;; Replace list hyphen with dot
-          (font-lock-add-keywords 'org-mode
-                                  '(("^ *\\([-]\\) "
-                                     (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+          (defun my/org-font-setup ()
+            ;; Replace list hyphen with dot
+            (font-lock-add-keywords 'org-mode
+                                    '(("^ *\\([-]\\) "
+                                       (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
-          ;; Set faces for heading levels
-          (dolist (face '((org-level-1 . 1.2)
-                          (org-level-2 . 1.1)
-                          (org-level-3 . 1.05)
-                          (org-level-4 . 1.0)
-                          (org-level-5 . 1.1)
-                          (org-level-6 . 1.1)
-                          (org-level-7 . 1.1)
-                          (org-level-8 . 1.1)))
-            (set-face-attribute (car face) nil :font "Courier" :weight 'regular :height (cdr face)))
+            ;; Set faces for heading levels
+            (dolist (face '((org-level-1 . 1.2)
+                            (org-level-2 . 1.1)
+                            (org-level-3 . 1.05)
+                            (org-level-4 . 1.0)
+                            (org-level-5 . 1.1)
+                            (org-level-6 . 1.1)
+                            (org-level-7 . 1.1)
+                            (org-level-8 . 1.1)))
+              (set-face-attribute (car face) nil :font "Courier" :weight 'regular :height (cdr face)))
 
-           ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-          (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-          (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-          (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
-          (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-          (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-          (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-          (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
-
-
-
-        ;; This will give us some padding on the left and the right so it feels more like a document
-        (defun my/org-mode-visual-fill ()
-          (setq visual-fill-column-width 150
-                visual-fill-column-center-text t)
-          (visual-fill-column-mode 1))
-
-        (use-package visual-fill-column
-          :hook (org-mode . my/org-mode-visual-fill))
+             ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+            (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+            (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+            (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+            (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+            (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+            (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+            (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
 
 
 
-        (use-package org
-            :hook (org-mode . my/org-mode-setup)
-            :config
-            (require 'ob)
-            (org-babel-do-load-languages
-             'org-babel-load-languages
-             '(
-               (python . t)
-               (emacs-lisp . t)
-               ))
-            (setq org-babel-python-command "python3")
-            (setq org-confirm-babel-evaluate nil)
+          ;; This will give us some padding on the left and the right so it feels more like a document
+          (defun my/org-mode-visual-fill ()
+            (setq visual-fill-column-width 150
+                  visual-fill-column-center-text t)
+            (visual-fill-column-mode 1))
 
-            (setq org-ellipsis " ▾"
-              org-hide-emphasis-markers t)
-            (setq org-agenda-start-with-log-mode t)
-            (setq org-enable-org-contacts-support t)
-            (setq org-log-done 'time)
-            (setq org-log-into-drawer t)
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;; START org-agenda ;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-            (setq org-agenda-files '("~/org/gtd/inbox.org"
-                         "~/org/gtd/tickler.org"
-                         "~/org/gtd/gtd.org"
-                         "~/org/holidays.org"
-                         "~/org/birthdays.org")) ;; this will set all the files that will appear in your agenda
-
-
-              (setq org-agenda-block-separator 8411)
-
-                (setq org-agenda-custom-commands
-                            '(("v" "A beter agenda view"
-                               ((tags "PRIORITY=\"A\""
-                                      ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                                   (org-agenda-overriding-header "High-priority unfinished tasks:")))
-
-                            (tags "PRIORITY=\"B\""
-                              ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                               (org-agenda-overriding-header "Medium-priority unfinished tasks:")))
-
-                            (tags "PRIORITY=\"C\""
-                                  ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                                 (org-agenda-overriding-header "Low-priority unfinished tasks:")))
-
-                            (tags "customtag"
-                                  ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                              (org-agenda-overriding-header "Tasks maredk with custom tag")))
-
-                        (agenda "")
-
-                        (alltodo "")
-
-                       )))
-
-                    )
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;; END org-agenda ;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-            (setq org-todo-keywords
-              '((sequence "TODO(t)" "NEXT(n!)" "|" "DONE(d!)")
-                ))
-                ;;(sequence "BACKLOG(b)" "ACTIVE(a)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+          (use-package visual-fill-column
+            :hook (org-mode . my/org-mode-visual-fill))
 
 
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;; Start org-refile ;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-            (setq org-refile-targets
-              '(("~/org/gtd/archive.org" :maxlevel . 1)
-                ("~/org/gtd/gtd.org" :maxlevel . 1)))
+          (use-package org
+              :hook (org-mode . my/org-mode-setup)
+              :config
+              (require 'ob)
+              (org-babel-do-load-languages
+               'org-babel-load-languages
+               '(
+                 (python . t)
+                 (emacs-lisp . t)
+                 ))
+              (setq org-babel-python-command "python3")
+              (setq org-confirm-babel-evaluate nil)
 
-            ;; Save Org buffers after refiling!
-            (advice-add 'org-refile :after 'org-save-all-org-buffers)
+              (setq org-ellipsis " ▾"
+                org-hide-emphasis-markers t)
+              (setq org-agenda-start-with-log-mode t)
+              (setq org-enable-org-contacts-support t)
+              (setq org-log-done 'time)
+              (setq org-log-into-drawer t)
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;; END org-refile ;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;; START org-capture ;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (setq org-capture-templates '(("t" "Todo [inbox]" entry
-                                   (file+headline "~/org/gtd/inbox.org" "Tasks")
-                                   "* TODO %i   %?")
-                                  ("T" "Tickler" entry
-                                   (file+headline "~/org/gtd/tickler.org" "Tickler")
-                                   "* %i%? \n %U")
-                                  ("j" "Journal" entry
-                                   (file+olp+datetree "~/org/journal.org")
-                                   "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-                                   :clock-in :clock-resume
-                                   :empty-lines 1)
-
-                                  ("c" "Contacts")
-                                  ("cp" "Personal Contacts" entry
-                                   (file+headline "~/org/contacts.org" "Personal")
-                                  "* %(org-contacts-template-name) 
-  :PROPERTIES: 
-  :EMAIL: 
-  :PHONE: 
-  :ADDRESS: 
-  :BIRTHDAY: %^{YYYY-MM-DD}
-  :NOTE: 
-  :END:\n" :kill-buffer t)
-
-                                  ("cc" "Professional Contacts" entry
-                                   (file+headline "~/org/contacts.org" "Contacts")
-                                   "* %(org-contacts-template-name)
-  "
-                                   )
-                                  ("m" "Metrics Capture")
-                                  ("mw" "Weight" table-line (file+headline "~/org/metrics.org" "Weight")
-                                   "| %U %^{Weight} | %^{Notes} |" :kill-buffer t)
-                                  ))
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; START org-agenda ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+              (setq org-agenda-files '("~/org/gtd/inbox.org"
+                           "~/org/gtd/tickler.org"
+                           "~/org/gtd/gtd.org"
+                           "~/org/holidays.org"
+                           "~/org/birthdays.org")) ;; this will set all the files that will appear in your agenda
 
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;; END org-capture ;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-            ;;org-babel;;;;;;
-    ;; (require 'ob-go) 
-    ;;        (org-babel-do-load-languages
-      ;;      'org-babel-load-languages
-      ;;      '((emacs-lisp . t)
-        ;;      (shell . t)
-     ;;         (terraform . t)
-       ;;       (go . t)
-       ;;       (python . t)))
+                (setq org-agenda-block-separator 8411)
 
+                  (setq org-agenda-custom-commands
+                              '(("v" "A beter agenda view"
+                                 ((tags "PRIORITY=\"A\""
+                                        ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                     (org-agenda-overriding-header "High-priority unfinished tasks:")))
 
+                              (tags "PRIORITY=\"B\""
+                                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                 (org-agenda-overriding-header "Medium-priority unfinished tasks:")))
 
+                              (tags "PRIORITY=\"C\""
+                                    ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                   (org-agenda-overriding-header "Low-priority unfinished tasks:")))
 
-            (push '("conf-unix" . conf-unix) org-src-lang-modes)
-            ;;;;; end org babel
+                              (tags "customtag"
+                                    ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                (org-agenda-overriding-header "Tasks maredk with custom tag")))
 
-            (my/org-font-setup))
+                          (agenda "")
+
+                          (alltodo "")
+
+                         )))
+
+                      )
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; END org-agenda ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+              (setq org-todo-keywords
+      '(
+        (sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+        (sequence "AREA(a)" "NEXT(n)" "|" "Archive(!)")
+        (sequence "PROJ(p)" "ACTIVE(a)"  "WAIT(w@/!)" "|" "COMPLETED(c)" "CANC(k@)")))
 
 
 
-  (defadvice org-agenda (around split-vertically activate)
-  (let ((split-width-threshold 80))  ; or whatever width makes sense for you
-    ad-do-it))
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; Start org-refile ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+              (setq org-refile-targets
+                '(("~/org/gtd/archive.org" :maxlevel . 1)
+                  ("~/org/gtd/gtd.org" :maxlevel . 1)))
+
+              ;; Save Org buffers after refiling!
+              (advice-add 'org-refile :after 'org-save-all-org-buffers)
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; END org-refile ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; START org-capture ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (setq org-capture-templates '(("t" "Todo [inbox]" entry
+                                     (file+headline "~/org/gtd/inbox.org" "Tasks")
+                                     "* TODO %i   %?")
+                                    ("T" "Tickler" entry
+                                     (file+headline "~/org/gtd/tickler.org" "Tickler")
+                                     "* %i%? \n %U")
+                                    ("j" "Journal" entry
+                                     (file+olp+datetree "~/org/journal.org")
+                                     "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+                                     :clock-in :clock-resume
+                                     :empty-lines 1)
+
+                                    ("c" "Contacts")
+                                    ("cp" "Personal Contacts" entry
+                                     (file+headline "~/org/contacts.org" "Personal")
+                                    "* %(org-contacts-template-name) 
+    :PROPERTIES: 
+    :EMAIL: 
+    :PHONE: 
+    :ADDRESS: 
+    :BIRTHDAY: %^{YYYY-MM-DD}
+    :NOTE: 
+    :END:\n" :kill-buffer t)
+
+                                    ("cc" "Professional Contacts" entry
+                                     (file+headline "~/org/contacts.org" "Contacts")
+                                     "* %(org-contacts-template-name)
+    "
+                                     )
+                                    ("m" "Metrics Capture")
+                                    ("mw" "Weight" table-line (file+headline "~/org/metrics.org" "Weight")
+                                     "| %U %^{Weight} | %^{Notes} |" :kill-buffer t)
+                                    ))
 
 
-  (defadvice org-capture (around split-vertically activate)
-  (let ((split-width-threshold 80))  ; or whatever width makes sense for you
-    ad-do-it))
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; END org-capture ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+              ;;org-babel;;;;;;
+      ;; (require 'ob-go) 
+      ;;        (org-babel-do-load-languages
+        ;;      'org-babel-load-languages
+        ;;      '((emacs-lisp . t)
+          ;;      (shell . t)
+       ;;         (terraform . t)
+         ;;       (go . t)
+         ;;       (python . t)))
+
+
+
+
+              (push '("conf-unix" . conf-unix) org-src-lang-modes)
+              ;;;;; end org babel
+
+              (my/org-font-setup))
+
+
+
+    (defadvice org-agenda (around split-vertically activate)
+    (let ((split-width-threshold 80))  ; or whatever width makes sense for you
+      ad-do-it))
+
+
+    (defadvice org-capture (around split-vertically activate)
+    (let ((split-width-threshold 80))  ; or whatever width makes sense for you
+      ad-do-it))
 #+end_src
 
 ** Change heading icons
@@ -704,8 +705,6 @@ This will allow you to use images in orgmode
     (add-to-list 'org-structure-template-alist '("tf" . "src terraform"))
 #+END_SRC
 
-
-
 ** org-roam
 #+begin_src emacs-lisp
 (use-package org-roam
@@ -726,6 +725,50 @@ This will allow you to use images in orgmode
 
 #+end_src
 
+** org-autolist
+#+begin_src emacs-lisp
+      (use-package org-autolist
+        :hook (org-mode . org-autolist-mode)
+        :config
+        (add-hook 'org-mode-hook (lambda () (org-autolist-mode))))
+  
+#+end_src
 
+** Fancy priorities
+#+begin_src emacs-lisp
+  (use-package org-fancy-priorities
+    :ensure t
+    :hook (org-mode . org-fancy-priorities-mode)
+    :config
+    (setq org-fancy-priorities-list '("🟥" "🟧" "🟨")))
+#+end_src
+* Calendar - calfw
+#+begin_src emacs-lisp
+(use-package calfw
+  :ensure t
+  :commands (cfw:open-calendar-buffer)
+  :config
+  ;; Integrate with Org mode
+  (use-package calfw-org
+    :ensure t
+    :config
+    (setq cfw:org-overwrite-default-keybinding t))
+
+  ;; (Optional) Bind a key to quickly open the Org mode calendar view
+  (global-set-key (kbd "C-c c") 'cfw:open-org-calendar))
+
+(defun cfw:open-org-calendar ()
+  "Open the Org mode calendar view with Calfw."
+  (interactive)
+  (let ((buf (get-buffer-create "*Org Calendar*")))
+    (pop-to-buffer buf)
+    (cfw:create-calendar-component-buffer
+     :view 'month
+     :contents-sources
+     (list
+      (cfw:org-create-source "Green")))))
+
+  #+end_src
 * Resources
 https://github.com/rememberYou/.emacs.d/blob/master/config.org
+
