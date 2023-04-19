@@ -21,7 +21,7 @@
  '(custom-safe-themes
    '("5f128efd37c6a87cd4ad8e8b7f2afaba425425524a68133ac0efd87291d05874" default))
  '(package-selected-packages
-   '(calfw-org exec-path-from-shell use-package-ensure-system-package delight which-key vterm visual-fill-column use-package typescript-mode terraform-mode rainbow-delimiters org-superstar org-roam org-fancy-priorities org-download org-contacts neotree lsp-ui lsp-treemacs lsp-pyright lsp-ivy ivy-rich general evil-nerd-commenter evil-leader evil-collection ebdb doom-themes doom-modeline counsel-projectile company-box command-log-mode all-the-icons))
+   '(beancount calfw-org exec-path-from-shell use-package-ensure-system-package delight which-key vterm visual-fill-column use-package typescript-mode terraform-mode rainbow-delimiters org-superstar org-roam org-fancy-priorities org-download org-contacts neotree lsp-ui lsp-treemacs lsp-pyright lsp-ivy ivy-rich general evil-nerd-commenter evil-leader evil-collection ebdb doom-themes doom-modeline counsel-projectile company-box command-log-mode all-the-icons))
  '(warning-suppress-types
    '((use-package)
      ((package reinitialization))

@@ -57,6 +57,8 @@ To manage the package configuratiosn with ~use-package~ you must install it with
     (require 'use-package)
   (setq use-package-always-ensure t)
 
+  (setq inhibit-startup-message t)
+
 #+END_SRC
 ** Correct $PATH
 exec-path-from-shell is a useful Emacs package that copies your shell's environment variables, such as PATH, to Emacs. This can help resolve issues where Emacs doesn't have the correct environment, leading to problems like "command not found."
@@ -140,7 +142,14 @@ Adds relative line numbers and disables it for specific modes
 
 
 #+END_SRC
-
+** smooth scrolling
+#+begin_src emacs-lisp
+  (pixel-scroll-mode)
+(setq pixel-dead-time 0) ; Never go back to the old scrolling behaviour.
+(setq pixel-resolution-fine-flag t) ; Scroll by number of pixels instead of lines (t = frame-char-height pixels).
+(setq mouse-wheel-scroll-amount '(1)) ; Distance in pixel-resolution to scroll each mouse wheel event.
+(setq mouse-wheel-progressive-speed nil) ; Progressive speed is too fast for me.
+#+end_src
 ** Rainbow Delimiters
 This will be useful when we are editing lisp
 #+BEGIN_SRC emacs-lisp
@@ -309,6 +318,7 @@ https://github.com/doomemacs/doomemacs/blob/develop/modules/config/default/%2Bev
       "b"  '(:ignore o :which-key "buffers")
       "p"  '(:ignore o :which-key "projectile")
       "m"  '(:ignore o :which-key "magit")
+       "c"  '(:ignore o :which-key "code")
 
       "tt" '(counsel-load-theme :which-key "choose theme")
       "ff" 'find-file
@@ -324,6 +334,7 @@ https://github.com/doomemacs/doomemacs/blob/develop/modules/config/default/%2Bev
       "e" 'treemacs
       "cs" 'lsp-treemacs-symbols
       "cj" 'lsp-ivy-workspace-symbol
+      "cr" 'lsp-find-references
       "ot" '(org-babel-tangle :which-key "Tangle Code") 
       "ol" '(org-insert-link :which-key "Insert/Edit Link")
       "oc" 'org-capture
@@ -460,8 +471,8 @@ you can press ? to see all the options you have in magit-status
                ))
             (setq org-babel-python-command "python3")
 
-            (setq org-ellipsis " ▾"
-              org-hide-emphasis-markers t)
+;            (setq org-ellipsis " ▾"
+ ;             org-hide-emphasis-markers t)
             (setq org-agenda-start-with-log-mode t)
             (setq org-enable-org-contacts-support t)
             (setq org-log-done 'time)
@@ -565,7 +576,8 @@ you can press ? to see all the options you have in magit-status
                          "~/org/holidays.org"
                          "~/org/birthdays.org")) ;; this will set all the files that will appear in your agenda
        (setq org-ellipsis " ▾")
-                   (setq org-confirm-babel-evaluate nil)
+       (setq org-hide-emphasis-markers t)
+       (setq org-confirm-babel-evaluate nil)
 
 
 
@@ -624,6 +636,9 @@ you can press ? to see all the options you have in magit-status
 
 
 #+END_SRC
+
+#+RESULTS:
+: ((conf-unix . conf-unix) (conf-unix . conf-unix) (C . c) (C++ . c++) (asymptote . asy) (bash . sh) (beamer . latex) (calc . fundamental) (cpp . c++) (ditaa . artist) (dot . fundamental) (elisp . emacs-lisp) (ocaml . tuareg) (screen . shell-script) (shell . sh) (sqlite . sql))
 
 ** org-agenda
 #+begin_src emacs-lisp
@@ -684,7 +699,25 @@ This will allow you to use images in orgmode
     (setq-default org-download-image-dir "./img")
   (setq org-download-screenshot-method "screencapture -i %s")
   (setq org-download-screenshot-file "./img/tmp.png")
-    )
+
+  ;; Annotate image links with the #+ATTR_ORG line
+  ;(defun my/org-download-annotate (link)
+   ; "Annotate the LINK with the #+ATTR_ORG line."
+   ; (format "#+ATTR_ORG: :width 300px \n[[%s]]" link))
+
+(defun my/org-download-annotate (link)
+  "Annotate LINK with the time of download."
+  (format "#+DOWNLOADED: %s @ %s\n#+ATTR_ORG: :width 700\n"
+          (if (equal link org-download-screenshot-file)
+              "screenshot"
+            link)
+          (format-time-string "%Y-%m-%d %H:%M:%S")))
+
+
+  
+  (setq org-download-annotate-function 'my/org-download-annotate)
+  )
+
 
 
   ;; see images in orgmode
@@ -810,7 +843,17 @@ This will allow you to use images in orgmode
   (lsp-enable-which-key-integration t))
 #+end_src
 
+this Gives us many cool functions
+| Function           | Description |
+|--------------------+-------------|
+| lsp-find-reference | find, can span multiple files inside a project |
+
+
 **** Typescript
+Make sure to install the lsp server:
+
+~npm i -g typescript-language-server; npm i -g typescript~
+
 #+begin_src emacs-lisp
   (use-package typescript-mode
   :mode "\\.ts\\'"
