@@ -848,8 +848,69 @@ this Gives us many cool functions
 |--------------------+-------------|
 | lsp-find-reference | find, can span multiple files inside a project |
 
+*** Company mode
+company mode is used for better auto completes
+#+begin_src emacs-lisp
+  (use-package company
+    :after lsp-mode
+    :hook (lsp-mode . company-mode)
+    :bind (:map company-active-map
+           ("<tab>" . company-complete-selection))
+        ;  (:map lsp-mode-map
+         ;  ("<tab>" . company-indent-or-complete-common))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.0))
 
-**** Typescript
+  (use-package company-box
+    :hook (company-mode . company-box-mode))
+#+end_src
+
+*** lsp-ui
+#+begin_src emacs-lisp
+ ; (use-package lsp-ui
+  ;  :hook (lsp-mode . lsp-ui-mode)
+   ; :custom 
+    ;(lsp-ui-doc-position 'bottom)
+  ;  )
+  (use-package lsp-ui
+ ; :ensure t
+  :after lsp-mode
+  :commands lsp-ui-mode
+  :config
+  (setq lsp-ui-sideline-enable t
+        lsp-ui-sideline-show-diagnostics t
+        lsp-ui-sideline-show-hover t
+        lsp-ui-sideline-show-code-actions t)
+  :bind (:map lsp-ui-mode-map
+              ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+              ([remap xref-find-references] . lsp-ui-peek-find-references)))
+
+;; Install and configure flymake
+(use-package flymake
+  :ensure t
+  :config
+  (add-hook 'flymake-diagnostic-functions 'lsp-flymake-backend))(use-package lsp-ui
+  :ensure t
+  :after lsp-mode
+  :commands lsp-ui-mode
+  :config
+  (setq lsp-ui-sideline-enable t
+        lsp-ui-sideline-show-diagnostics t
+        lsp-ui-sideline-show-hover t
+        lsp-ui-sideline-show-code-actions t)
+  :bind (:map lsp-ui-mode-map
+              ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+              ([remap xref-find-references] . lsp-ui-peek-find-references)))
+
+;; Install and configure flymake
+(use-package flymake
+  :ensure t
+  :config
+  (add-hook 'flymake-diagnostic-functions 'lsp-flymake-backend))
+#+end_src
+
+*** Typescript
 Make sure to install the lsp server:
 
 ~npm i -g typescript-language-server; npm i -g typescript~
