@@ -910,6 +910,11 @@ company mode is used for better auto completes
   (add-hook 'flymake-diagnostic-functions 'lsp-flymake-backend))
 #+end_src
 
+** lsp-treemacs
+#+begin_src emacs-lisp
+(use-package lsp-treemacs
+  :after lsp)
+#+end_src
 *** Typescript
 Make sure to install the lsp server:
 
