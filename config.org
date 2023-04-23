@@ -294,6 +294,8 @@ NOTE: when usuing M-x you can do M-o and d to go to the definition of a function
   (evil-set-undo-system 'undo-tree)
   (global-undo-tree-mode 1))
 #+end_src
+
+
 * Keybindings
 ** General
 
@@ -413,149 +415,166 @@ you can press ? to see all the options you have in magit-status
 ** Regular org
 #+begin_src emacs-lisp 
 
-        ;;change the size and font of headlines
-        (defun my/org-mode-setup ()
-          (org-indent-mode)
-          (variable-pitch-mode 1)
-          (visual-line-mode 1))
+          ;;change the size and font of headlines
+          (defun my/org-mode-setup ()
+            (org-indent-mode)
+            (variable-pitch-mode 1)
+            (visual-line-mode 1))
 
-        (defun my/org-font-setup ()
-          ;; Replace list hyphen with dot
-          (font-lock-add-keywords 'org-mode
-                                  '(("^ *\\([-]\\) "
-                                     (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+          (defun my/org-font-setup ()
+            ;; Replace list hyphen with dot
+            (font-lock-add-keywords 'org-mode
+                                    '(("^ *\\([-]\\) "
+                                       (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
-          ;; Set faces for heading levels
-          (dolist (face '((org-level-1 . 1.2)
-                          (org-level-2 . 1.1)
-                          (org-level-3 . 1.05)
-                          (org-level-4 . 1.0)
-                          (org-level-5 . 1.1)
-                          (org-level-6 . 1.1)
-                          (org-level-7 . 1.1)
-                          (org-level-8 . 1.1)))
-            (set-face-attribute (car face) nil :font "Courier" :weight 'regular :height (cdr face)))
+            ;; Set faces for heading levels
+            (dolist (face '((org-level-1 . 1.2)
+                            (org-level-2 . 1.1)
+                            (org-level-3 . 1.05)
+                            (org-level-4 . 1.0)
+                            (org-level-5 . 1.1)
+                            (org-level-6 . 1.1)
+                            (org-level-7 . 1.1)
+                            (org-level-8 . 1.1)))
+              (set-face-attribute (car face) nil :font "Courier" :weight 'regular :height (cdr face)))
 
-           ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-          (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-          (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-          (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
-          (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-          (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-          (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-          (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
-
-
-
-        ;; This will give us some padding on the left and the right so it feels more like a document
-        (defun my/org-mode-visual-fill ()
-          (setq visual-fill-column-width 150
-                visual-fill-column-center-text t)
-          (visual-fill-column-mode 1))
-
-        (use-package visual-fill-column
-          :hook (org-mode . my/org-mode-visual-fill))
+             ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+            (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+            (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+            (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+            (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+            (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+            (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+            (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
 
 
 
-        (use-package org
-            :hook (org-mode . my/org-mode-setup)
-            :config
-            (require 'ob)
-            (org-babel-do-load-languages
-             'org-babel-load-languages
-             '(
-              (conf . t)
-               (python . t)
-               (emacs-lisp . t)
-               ))
-            (setq org-babel-python-command "python3")
+          ;; This will give us some padding on the left and the right so it feels more like a document
+          (defun my/org-mode-visual-fill ()
+            (setq visual-fill-column-width 150
+                  visual-fill-column-center-text t)
+            (visual-fill-column-mode 1))
 
-;            (setq org-ellipsis " ▾"
- ;             org-hide-emphasis-markers t)
-            (setq org-agenda-start-with-log-mode t)
-            (setq org-enable-org-contacts-support t)
-            (setq org-log-done 'time)
-            (setq org-log-into-drawer t)
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;; START org-agenda ;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-              (setq org-agenda-block-separator 8411)
-
-                (setq org-agenda-custom-commands
-                            '(("v" "A beter agenda view"
-                               ((tags "PRIORITY=\"A\""
-                                      ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                                   (org-agenda-overriding-header "High-priority unfinished tasks:")))
-
-                            (tags "PRIORITY=\"B\""
-                              ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                               (org-agenda-overriding-header "Medium-priority unfinished tasks:")))
-
-                            (tags "PRIORITY=\"C\""
-                                  ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                                 (org-agenda-overriding-header "Low-priority unfinished tasks:")))
-
-                            (tags "customtag"
-                                  ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                              (org-agenda-overriding-header "Tasks maredk with custom tag")))
-
-                        (avagenda "")
-
-                        (alltodo "")
-
-                       )))
-
-                    )
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;; END org-agenda ;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;; Start org-refile ;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-            (setq org-refile-targets
-              '(("~/org/gtd/archive.org" :maxlevel . 1)
-                ("~/org/gtd/gtd.org" :maxlevel . 1)))
-
-            ;; Save Org buffers after refiling!
-            (advice-add 'org-refile :after 'org-save-all-org-buffers)
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;; END org-refile ;;;;;;;;;;;;;;;;;;;
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-            ;;org-babel;;;;;;
-    ;; (require 'ob-go) 
-    ;;        (org-babel-do-load-languages
-      ;;      'org-babel-load-languages
-      ;;      '((emacs-lisp . t)
-        ;;      (shell . t)
-     ;;         (terraform . t)
-       ;;       (go . t)
-       ;;       (python . t)))
+          (use-package visual-fill-column
+            :hook (org-mode . my/org-mode-visual-fill))
 
 
 
 
-            ;;;;; end org babel
 
-            (my/org-font-setup))
+          (use-package org
+              :hook (org-mode . my/org-mode-setup)
+              :config
+              ;;;;;;;;;;; Start org-babel
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; START org-babel ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+              (require 'ob)
+              (require 'ob-python)
+              (setq org-confirm-babel-evaluate nil) ; Optional: don't prompt before running code blocks
+              (setq org-src-fontify-natively t)
+              (setq org-src-tab-acts-natively t)
+              (setq org-src-window-setup 'current-window)
+              (setq org-babel-python-command "python3") ; Set this to "python3" if your system uses "python3" as the command
+              (org-babel-do-load-languages
+               'org-babel-load-languages
+               '(
+                (conf . t)
+                (python . t)
+                (emacs-lisp . t)
+                ))
+  ;            (setq org-ellipsis " ▾"
+   ;             org-hide-emphasis-markers t)
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; End org-babel ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+                      (setq org-agenda-start-with-log-mode t)
+              (setq org-enable-org-contacts-support t)
+              (setq org-log-done 'time)
+              (setq org-log-into-drawer t)
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; START org-agenda ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+                (setq org-agenda-block-separator 8411)
+
+                  (setq org-agenda-custom-commands
+                              '(("v" "A beter agenda view"
+                                 ((tags "PRIORITY=\"A\""
+                                        ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                     (org-agenda-overriding-header "High-priority unfinished tasks:")))
+
+                              (tags "PRIORITY=\"B\""
+                                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                 (org-agenda-overriding-header "Medium-priority unfinished tasks:")))
+
+                              (tags "PRIORITY=\"C\""
+                                    ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                   (org-agenda-overriding-header "Low-priority unfinished tasks:")))
+
+                              (tags "customtag"
+                                    ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                                (org-agenda-overriding-header "Tasks maredk with custom tag")))
+
+                          (avagenda "")
+
+                          (alltodo "")
+
+                         )))
+
+                      )
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; END org-agenda ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; Start org-refile ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+              (setq org-refile-targets
+                '(("~/org/gtd/archive.org" :maxlevel . 1)
+                  ("~/org/gtd/gtd.org" :maxlevel . 1)))
+
+              ;; Save Org buffers after refiling!
+              (advice-add 'org-refile :after 'org-save-all-org-buffers)
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; END org-refile ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+              ;;org-babel;;;;;;
+      ;; (require 'ob-go) 
+      ;;        (org-babel-do-load-languages
+        ;;      'org-babel-load-languages
+        ;;      '((emacs-lisp . t)
+          ;;      (shell . t)
+       ;;         (terraform . t)
+         ;;       (go . t)
+         ;;       (python . t)))
 
 
 
-  (defadvice org-agenda (around split-vertically activate)
-  (let ((split-width-threshold 80))  ; or whatever width makes sense for you
-    ad-do-it))
+
+              ;;;;; end org babel
+
+              (my/org-font-setup))
 
 
-  (defadvice org-capture (around split-vertically activate)
-  (let ((split-width-threshold 80))  ; or whatever width makes sense for you
-    ad-do-it))
+
+    (defadvice org-agenda (around split-vertically activate)
+    (let ((split-width-threshold 80))  ; or whatever width makes sense for you
+      ad-do-it))
+
+
+    (defadvice org-capture (around split-vertically activate)
+    (let ((split-width-threshold 80))  ; or whatever width makes sense for you
+      ad-do-it))
 #+end_src
 
 ** Change heading icons
