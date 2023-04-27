@@ -60,6 +60,10 @@ To manage the package configuratiosn with ~use-package~ you must install it with
   (setq inhibit-startup-message t)
 
 #+END_SRC
+
+#+RESULTS:
+: t
+
 ** Correct $PATH
 exec-path-from-shell is a useful Emacs package that copies your shell's environment variables, such as PATH, to Emacs. This can help resolve issues where Emacs doesn't have the correct environment, leading to problems like "command not found."
 
@@ -322,13 +326,14 @@ https://github.com/doomemacs/doomemacs/blob/develop/modules/config/default/%2Bev
       "m"  '(:ignore o :which-key "magit")
        "c"  '(:ignore o :which-key "code")
 
+       "s" '(org-download-screenshot :which-key "screenshot") 
       "tt" '(counsel-load-theme :which-key "choose theme")
       "ff" 'find-file
       "bs" 'counsel-switch-buffer
       "aa" 'org-agenda
       "at" 'org-time-stamp
       "as" 'org-schedule
-      "ar" 'org-refile
+      "ar" 'org-eefile
       "ps" '(counsel-projectile-rg :which-key "Search project using rg")
       "ms" 'magit-status
       "nf" 'org-roam-node-find
@@ -534,21 +539,6 @@ you can press ? to see all the options you have in magit-status
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-      ;;;;;;;;;;;;;;;;;;; Start org-refile ;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-              (setq org-refile-targets
-                '(("~/org/gtd/archive.org" :maxlevel . 1)
-                  ("~/org/gtd/gtd.org" :maxlevel . 1)))
-
-              ;; Save Org buffers after refiling!
-              (advice-add 'org-refile :after 'org-save-all-org-buffers)
-
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-      ;;;;;;;;;;;;;;;;;;; END org-refile ;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-              ;;org-babel;;;;;;
       ;; (require 'ob-go) 
       ;;        (org-babel-do-load-languages
         ;;      'org-babel-load-languages
@@ -637,7 +627,21 @@ you can press ? to see all the options you have in magit-status
                                    "| %U %^{Weight} | %^{Notes} |" :kill-buffer t)
                                   ))
 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; Start org-refile ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+              (setq org-refile-targets
+                '(("~/org/gtd/archive.org" :maxlevel . 1)
+                  ("~/org/gtd/gtd.org" :maxlevel . 1)))
 
+              ;; Save Org buffers after refiling!
+              (advice-add 'org-refile :after 'org-save-all-org-buffers)
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; END org-refile ;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;;;;;;;;;;;;;;;;;;; END org-capture ;;;;;;;;;;;;;;;;;;;
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -707,6 +711,13 @@ you can press ? to see all the options you have in magit-status
 
 ** org-download
 This will allow you to use images in orgmode
+
+org-download does not allow you to paste from your clipboard directly,
+you can use a tool like ~pngpaste~ to achieve this.
+
+You can download ~pngpaste~ with
+~brew install pngpaste~
+
 #+BEGIN_SRC emacs-lisp
     (use-package org-download
     :ensure t
@@ -716,7 +727,8 @@ This will allow you to use images in orgmode
     (add-hook 'dired-mode-hook 'org-download-enable)
     (setq org-download-method 'directory)
     (setq-default org-download-image-dir "./img")
-  (setq org-download-screenshot-method "screencapture -i %s")
+  ;(setq org-download-screenshot-method "screencapture -i %s")
+  (setq org-download-screenshot-method "pngpaste %s")
   (setq org-download-screenshot-file "./img/tmp.png")
 
   ;; Annotate image links with the #+ATTR_ORG line
@@ -842,6 +854,10 @@ This will allow you to use images in orgmode
       (cfw:org-create-source "Green")))))
 
   #+end_src
+
+  #+RESULTS:
+  : cfw:open-org-calendar
+
 * Beancount
 #+begin_src emacs-lisp
 (use-package beancount
@@ -922,17 +938,20 @@ company mode is used for better auto completes
               ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
               ([remap xref-find-references] . lsp-ui-peek-find-references)))
 
-;; Install and configure flymake
-(use-package flymake
-  :ensure t
-  :config
-  (add-hook 'flymake-diagnostic-functions 'lsp-flymake-backend))
 #+end_src
 
 ** lsp-treemacs
 #+begin_src emacs-lisp
 (use-package lsp-treemacs
   :after lsp)
+#+end_src
+
+** lsp-ivy
+This gives you away to find a specific symbol inside a project
+use ~<SPACE> cj~
+#+begin_src emacs-lisp
+  (use-package lsp-ivy)
+  
 #+end_src
 *** Typescript
 Make sure to install the lsp server:
