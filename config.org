@@ -134,6 +134,7 @@ Adds relative line numbers and disables it for specific modes
     "Enable relative line numbers in all modes except Org-mode, Term-mode, and Shell-mode."
     (unless (or(derived-mode-p 'org-mode)
                 (derived-mode-p 'term-mode)
+                (derived-mode-p 'vterm-mode)
                 (derived-mode-p 'treemacs-mode-hook)
                 (derived-mode-p 'eshell-mode-hook)
                 (derived-mode-p 'shell-mode))
@@ -864,6 +865,18 @@ You can download ~pngpaste~ with
   :ensure t
   :mode ("\\.beancount\\'" . beancount-mode))
 #+end_src
+
+
+* Skeletor
+#+begin_src emacs-lisp
+(use-package skeletor
+  :config
+  ;; Set the directory where your project templates will be stored.
+  (setq skeletor-user-directory "~/.emacs.d/skeletor-templates/")
+
+  ;; Set the default project location.
+  (setq skeletor-global-directory "~/Projects/"))
+#+end_src
 * Development
 
 ** Language Servers
@@ -964,6 +977,35 @@ Make sure to install the lsp server:
   :hook (typescript-mode . lsp-deferred)
   :config
   (setq typescript-indent-level 2))
+#+end_src
+
+
+* Term modes
+** Term
+#+begin_src emacs-lisp
+;;(use-package term
+  ;;:config
+ ;; (setq explicit-shell-file-name "zsh") ;; Change this to zsh, etc
+  ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
+
+  ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
+  ;; (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *"))
+#+end_src
+
+** Better term-mode colors
+#+begin_src emacs-lisp
+(use-package eterm-256color
+  :hook (term-mode . eterm-256color-mode))
+#+end_src
+
+** vterm
+#+begin_src emacs-lisp
+(use-package vterm
+  :commands vterm
+  :config
+  (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
+  (setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
+  (setq vterm-max-scrollback 10000))
 #+end_src
 
 
