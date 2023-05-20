@@ -284,7 +284,8 @@ NOTE: when usuing M-x you can do M-o and d to go to the definition of a function
 
   ;; evil-collection will turn evil-mode on in many emacs modes by default
   (use-package evil-collection
-    :after magit ;;only because evil-magit is only availble in evil-collection now not melpa
+    :after evil
+  ;  :after magit ;;only because evil-magit is only availble in evil-collection now not melpa
     :config
     (evil-collection-init))
 
@@ -1053,14 +1054,20 @@ Eshell has evil mode which is great
 * File management
 ** Dired
 #+begin_src emacs-lisp
-  (use-package dired
-  :ensure nil
-  :commands (dired dired-jump)
-  :bind (("C-x C-j" . dired-jump))
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "h" 'dired-single-up-directory
-    "l" 'dired-single-buffer))
+    (use-package dired
+    :ensure nil
+    :commands (dired dired-jump)
+    :bind (("C-x C-j" . dired-jump))
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-up-directory
+      "l" 'dired-find-file
+      "a" 'dired-create-empty-file)
+
+    )
+#+end_src
+** Create a file in Dired using "a"
+#+begin_src emacs-lisp
 #+end_src
 * Resources
 
