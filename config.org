@@ -1068,7 +1068,6 @@ Eshell has evil mode which is great
   (setq dired-listing-switches "-al --group-directories-first")
 
        :config
-       (delete-by-moving-to-trash t)
        (evil-collection-define-key 'normal 'dired-mode-map
          "h" 'dired-single-up-directory
          "l" 'dired-single-buffer
