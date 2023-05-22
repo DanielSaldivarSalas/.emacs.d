@@ -333,10 +333,12 @@ https://github.com/doomemacs/doomemacs/blob/develop/modules/config/default/%2Bev
       "tt" '(counsel-load-theme :which-key "choose theme")
       "ff" 'find-file
       "bs" 'counsel-switch-buffer
+      "bk" 'kill-buffer-and-window
       "aa" 'org-agenda
       "at" 'org-time-stamp
       "as" 'org-schedule
       "ar" 'org-eefile
+      "d" 'dired
       "ps" '(counsel-projectile-rg :which-key "Search project using rg")
       "ms" 'magit-status
       "nf" 'org-roam-node-find
@@ -490,6 +492,7 @@ you can press ? to see all the options you have in magit-status
                '(
                 (conf . t)
                 (python . t)
+                (lua . t)
                 (emacs-lisp . t)
                 ))
   ;            (setq org-ellipsis " ▾"
@@ -772,13 +775,14 @@ You can download ~pngpaste~ with
 #+END_SRC
 ** Structure-templates
 #+BEGIN_SRC emacs-lisp
- (require 'org-tempo)
+  (require 'org-tempo)
 
-  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-  (add-to-list 'org-structure-template-alist '("cf" . "src conf"))
-  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-  (add-to-list 'org-structure-template-alist '("py" . "src python"))
-    (add-to-list 'org-structure-template-alist '("tf" . "src terraform"))
+   (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+   (add-to-list 'org-structure-template-alist '("cf" . "src conf"))
+  (add-to-list 'org-structure-template-alist '("lua" . "src lua"))
+   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+   (add-to-list 'org-structure-template-alist '("py" . "src python"))
+     (add-to-list 'org-structure-template-alist '("tf" . "src terraform"))
 #+END_SRC
 
 
@@ -1054,21 +1058,58 @@ Eshell has evil mode which is great
 * File management
 ** Dired
 #+begin_src emacs-lisp
-    (use-package dired
-    :ensure nil
-    :commands (dired dired-jump)
-    :bind (("C-x C-j" . dired-jump))
-    :config
-    (evil-collection-define-key 'normal 'dired-mode-map
-      "h" 'dired-up-directory
-      "l" 'dired-find-file
-      "a" 'dired-create-empty-file)
+       ;(use-package dired
+     ;  :ensure nil
+      ; :commands (dired dired-jump)
+       ;:bind (("C-x C-j" . dired-jump))
+     ;  :config
+      ; (evil-collection-define-key 'normal 'dired-mode-map
+       ;  "h" 'dired-up-directory
+      ;   "l" 'dired-find-file
+    ;     "a" 'dired-create-empty-file)
 
-    )
+     ;  )
+
+
+     (use-package dired
+       :ensure nil
+       :commands (dired dired-jump)
+       :bind (("C-x C-j" . dired-jump))
+       :custom
+      ; :custom ((dired-listing-switches "-agho --group-directories-first"))
+  (setq insert-directory-program "gls" dired-use-ls-dired t)
+  (setq dired-listing-switches "-al --group-directories-first")
+     
+       :config
+       (evil-collection-define-key 'normal 'dired-mode-map
+         "h" 'dired-single-up-directory
+         "l" 'dired-single-buffer
+         "a" 'dired-create-empty-file))
+
+     (use-package dired-single)
+
+     (use-package all-the-icons-dired
+       :hook (dired-mode . all-the-icons-dired-mode))
+
+     ;(use-package dired-open
+      ; :config
+       ;; Doesn't work as expected!
+       ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
+       ;;(setq dired-open-extensions '(("png" . "feh")
+         ;                            ("mkv" . "mpv"))))
+
+     ;(use-package dired-hide-dotfiles
+      ; :hook (dired-mode . dired-hide-dotfiles-mode)
+       ;:config
+      ; (evil-collection-define-key 'normal 'dired-mode-map
+       ;  "H" 'dired-hide-dotfiles-mode))
+
 #+end_src
 ** Create a file in Dired using "a"
 #+begin_src emacs-lisp
 #+end_src
+
+
 * Resources
 
 https://github.com/rememberYou/.emacs.d/blob/master/config.org
