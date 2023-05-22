@@ -1058,19 +1058,6 @@ Eshell has evil mode which is great
 * File management
 ** Dired
 #+begin_src emacs-lisp
-       ;(use-package dired
-     ;  :ensure nil
-      ; :commands (dired dired-jump)
-       ;:bind (("C-x C-j" . dired-jump))
-     ;  :config
-      ; (evil-collection-define-key 'normal 'dired-mode-map
-       ;  "h" 'dired-up-directory
-      ;   "l" 'dired-find-file
-    ;     "a" 'dired-create-empty-file)
-
-     ;  )
-
-
      (use-package dired
        :ensure nil
        :commands (dired dired-jump)
@@ -1079,8 +1066,9 @@ Eshell has evil mode which is great
       ; :custom ((dired-listing-switches "-agho --group-directories-first"))
   (setq insert-directory-program "gls" dired-use-ls-dired t)
   (setq dired-listing-switches "-al --group-directories-first")
-     
+
        :config
+       (delete-by-moving-to-trash t)
        (evil-collection-define-key 'normal 'dired-mode-map
          "h" 'dired-single-up-directory
          "l" 'dired-single-buffer
@@ -1088,21 +1076,22 @@ Eshell has evil mode which is great
 
      (use-package dired-single)
 
-     (use-package all-the-icons-dired
-       :hook (dired-mode . all-the-icons-dired-mode))
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
 
-     ;(use-package dired-open
-      ; :config
-       ;; Doesn't work as expected!
-       ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
-       ;;(setq dired-open-extensions '(("png" . "feh")
-         ;                            ("mkv" . "mpv"))))
+(use-package dired-open
+  :config
+  ;; Doesn't work as expected!
+  ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
+  (setq dired-open-extensions '(("png" . "feh")
+                                ("mkv" . "mpv"))))
 
-     ;(use-package dired-hide-dotfiles
-      ; :hook (dired-mode . dired-hide-dotfiles-mode)
-       ;:config
-      ; (evil-collection-define-key 'normal 'dired-mode-map
-       ;  "H" 'dired-hide-dotfiles-mode))
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "H" 'dired-hide-dotfiles-mode))
+
 
 #+end_src
 ** Create a file in Dired using "a"
