@@ -17,7 +17,6 @@
   (add-hook 'after-save-hook #'my/tangle-config-on-save)
 #+end_src
 
-
 * Emacs Initialization
 ** For Macs
  Download brew install emacs-plus ;; Do not install regular emacs from brew
@@ -482,6 +481,8 @@ you can press ? to see all the options you have in magit-status
 
               (require 'ob)
               (require 'ob-python)
+              (require 'lua-mode)
+              (require 'ob-lua)
               (setq org-confirm-babel-evaluate nil) ; Optional: don't prompt before running code blocks
               (setq org-src-fontify-natively t)
               (setq org-src-tab-acts-natively t)
@@ -889,13 +890,26 @@ You can download ~pngpaste~ with
 *** Initial LSP configuration
 #+begin_src emacs-lisp
 
-  (use-package lsp-mode
-  :commands (lsp lsp-deferred)
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  :config
-  (lsp-enable-which-key-integration t))
-#+end_src
+      (use-package lsp-mode
+        :commands (lsp lsp-deferred)
+        :init
+        (setq lsp-keymap-prefix "C-c l")
+        :config
+      (setq lsp-clients-lua-language-server-command '("/opt/homebrew/bin/lua-language-server"))
+        (lsp-enable-which-key-integration t)
+        :hook ((lua-mode . lsp-deferred)    ;; Enable Lua LSP
+         (python-mode . lsp-deferred)) ;; Enable Python LSP
+  )
+
+      ;(use-package lsp-mode
+      ;  :ensure t
+       ; :hook ((python-mode . lsp-deferred)
+        ;       (lsp-mode . lsp-enable-which-key-integration))
+       ; :commands lsp-deferred
+        ;:config
+       ; (setq lsp-pyright-venv-path ".venv"))
+
+ #+end_src
 
 this Gives us many cool functions
 | Function           | Description |
@@ -985,7 +999,47 @@ Make sure to install the lsp server:
   (setq typescript-indent-level 2))
 #+end_src
 
+*** Python
+#+begin_src emacs-lisp
+  (use-package python-mode
+    :ensure nil
+    
+    :custom
+    (python-shell-interpreter "python3"))
+#+end_src
 
+#+begin_src emacs-lisp
+  (use-package lsp-pyright
+     :ensure t
+     :after lsp-mode
+     :hook (python-mode . (lambda ()
+                             (require 'lsp-pyright)
+                             (lsp))))  ; or lsp-deferred
+
+
+   ;(use-package lsp-pyright
+  ; :ensure t
+   ;:after lsp-mode
+  ; :if (executable-find "pyright")
+   ;:hook (python-mode . (lambda ()
+    ;                      (require 'lsp-pyright)
+     ;                     (lsp-deferred))))
+
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package pyvenv
+    :config
+    (pyvenv-mode 1))
+#+end_src
+
+*** lua
+#+begin_src emacs-lisp
+(use-package lua-mode
+  :ensure t
+  :mode "\\.lua\\'"
+  :interpreter "lua")
+#+end_src
 * Term modes
 ** Term
 #+begin_src emacs-lisp
