@@ -127,22 +127,23 @@ Adds relative line numbers and disables it for specific modes
 #+BEGIN_SRC emacs-lisp
 
 
-            (column-number-mode)
+              (column-number-mode)
 
-(defun my-relative-line-numbers ()
-    "Enable relative line numbers in all modes except Org-mode, Term-mode, and Shell-mode."
-    (unless (or(derived-mode-p 'org-mode)
-                (derived-mode-p 'term-mode)
-                (derived-mode-p 'vterm-mode)
-                (derived-mode-p 'eshell-mode)
-                (derived-mode-p 'treemacs-mode-hook)
-                (derived-mode-p 'eshell-mode-hook)
-                (derived-mode-p 'shell-mode))
-      (display-line-numbers-mode t)
-      (setq display-line-numbers 'visual)))
+  (defun my-relative-line-numbers ()
+      "Enable relative line numbers in all modes except Org-mode, Term-mode, and Shell-mode."
+      (unless (or
+              (derived-mode-p 'org-mode)
+                  (derived-mode-p 'term-mode)
+                  (derived-mode-p 'vterm-mode)
+                  (derived-mode-p 'eshell-mode)
+                  (derived-mode-p 'treemacs-mode-hook)
+                  (derived-mode-p 'eshell-mode-hook)
+                  (derived-mode-p 'shell-mode))
+        (display-line-numbers-mode t)
+        (setq display-line-numbers 'visual)))
 
-  (add-hook 'find-file-hook 'my-relative-line-numbers)
-  (add-hook 'after-change-major-mode-hook 'my-relative-line-numbers)
+    (add-hook 'find-file-hook 'my-relative-line-numbers)
+    (add-hook 'after-change-major-mode-hook 'my-relative-line-numbers)
 
 
 
@@ -476,13 +477,14 @@ you can press ? to see all the options you have in magit-status
               :config
               ;;;;;;;;;;; Start org-babel
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-      ;;;;;;;;;;;;;;;;;;; START org-babel ;;;;;;;;;;;;;;;;;;;
+      ;;;;;;;;;;;;;;;;;;; START rg-babel ;;;;;;;;;;;;;;;;;;;
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
               (require 'ob)
               (require 'ob-python)
               (require 'lua-mode)
               (require 'ob-lua)
+              (require 'ob-shell)
               (setq org-confirm-babel-evaluate nil) ; Optional: don't prompt before running code blocks
               (setq org-src-fontify-natively t)
               (setq org-src-tab-acts-natively t)
@@ -491,10 +493,12 @@ you can press ? to see all the options you have in magit-status
               (org-babel-do-load-languages
                'org-babel-load-languages
                '(
+                 (java . t)
                 (conf . t)
                 (python . t)
                 (lua . t)
                 (emacs-lisp . t)
+                (shell . t)
                 ))
   ;            (setq org-ellipsis " ▾"
    ;             org-hide-emphasis-markers t)
@@ -781,6 +785,7 @@ You can download ~pngpaste~ with
    (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
    (add-to-list 'org-structure-template-alist '("cf" . "src conf"))
   (add-to-list 'org-structure-template-alist '("lua" . "src lua"))
+  (add-to-list 'org-structure-template-alist '("ht" . "src html"))
    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
    (add-to-list 'org-structure-template-alist '("py" . "src python"))
      (add-to-list 'org-structure-template-alist '("tf" . "src terraform"))
@@ -835,7 +840,21 @@ You can download ~pngpaste~ with
   ;; Add your customizations and additional functionality for conf-mode here
   )
 #+end_src
-* Calendar - calfw
+** Iimpatient-mode
+this package will be used to get org-mode enabled in our orgmode files
+#+begin_src emacs-lisp
+(use-package impatient-mode
+  :ensure t
+  :config
+  (progn
+    ;; Start a server with 'httpd-start' when Emacs starts
+    (httpd-start)
+    ;; Optional customizations go here
+    ))
+
+(add-hook 'html-mode-hook 'impatient-mode)
+#+end_src
+* 
 #+begin_src emacs-lisp
 (use-package calfw
   :ensure t
@@ -882,7 +901,14 @@ You can download ~pngpaste~ with
   (setq skeletor-user-directory "~/.emacs.d/skeletor-templates/")
 
   ;; Set the default project location.
-  (setq skeletor-global-directory "~/Projects/"))
+  (setq skeletor-project-directory "~/Projects/Code"))
+#+end_src
+
+** Simple python project
+#+begin_src emacs-lisp
+  (skeletor-define-template "python-simple"
+    :default-license (rx bol "mit")
+  )
 #+end_src
 * Development
 
@@ -1040,6 +1066,14 @@ Make sure to install the lsp server:
   :mode "\\.lua\\'"
   :interpreter "lua")
 #+end_src
+** Python
+*** Elpy
+#+begin_src emacs-lisp
+(use-package elpy
+  :ensure t
+  :init
+  (elpy-enable)
+#+end_src
 * Term modes
 ** Term
 #+begin_src emacs-lisp
@@ -1151,8 +1185,30 @@ Eshell has evil mode which is great
 #+begin_src emacs-lisp
 #+end_src
 
-
 * Resources
 
 https://github.com/rememberYou/.emacs.d/blob/master/config.org
 
+
+* affe - fuzzy matching without fzf
+
+#+begin_src emacs-lisp
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
+#+end_src
+#+begin_src emacs-lisp
+(use-package affe
+  :config
+  ;; Manual preview key for `affe-grep'
+  (consult-customize affe-grep :preview-key "M-."))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun affe-orderless-regexp-compiler (input _type _ignorecase)
+  (setq input (orderless-pattern-compiler input))
+  (cons input (apply-partially #'orderless--highlight input)))
+(setq affe-regexp-compiler #'affe-orderless-regexp-compiler)
+#+end_src
