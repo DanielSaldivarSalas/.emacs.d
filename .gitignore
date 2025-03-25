@@ -3,6 +3,7 @@
 *~
 .cache
 /elpa/
+evil/
 config.el
 custom.el
 tutorial
@@ -39,3 +40,4 @@ ebdb
 games/
 projectile-bookmarks.eld
 .org-id-locations
+projects

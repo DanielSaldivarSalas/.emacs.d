@@ -1,67 +1,83 @@
 #+AUTHOR: Daniel Saldivar
 #+TITLE: GNU Emacs Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./config.el :mkdirp yes
+#+STARTUP: showeverything
+#+OPTIONS: toc:2
 
+* Table of Contents :toc:
+- [[#auto-tangle][Auto Tangle]]
+- [[#emacs-initialization][Emacs Initialization]]
+  - [[#for-macs][For Macs]]
+  - [[#correct-path][Correct $PATH]]
+  - [[#open-up-gtd-file-automatically][Open up gtd file automatically]]
+- [[#defaults][Defaults]]
+- [[#general-improvements][General Improvements]]
+  - [[#line-numbers][Line numbers]]
+  - [[#smooth-scrolling][smooth scrolling]]
+  - [[#rainbow-delimiters][Rainbow Delimiters]]
+  - [[#tabs][Tabs]]
+  - [[#helpful][helpful]]
+  - [[#apperance][Apperance]]
+  - [[#ivy-and-counsel][Ivy and Counsel]]
+- [[#evil-mode][Evil Mode]]
+  - [[#vim-redo][Vim Redo]]
+- [[#keybindings][Keybindings]]
+  - [[#general][General]]
+  - [[#which-key][which-key]]
+- [[#sqlite][Sqlite]]
+- [[#projectile][Projectile]]
+- [[#magit][Magit]]
+- [[#org-mode][Org Mode]]
+  - [[#regular-org][Regular org]]
+  - [[#change-heading-icons][Change heading icons]]
+  - [[#org-agenda][org-agenda]]
+  - [[#org-download][org-download]]
+  - [[#structure-templates][Structure-templates]]
+  - [[#toc-org][toc-org]]
+  - [[#org-autolist][org-autolist]]
+  - [[#fancy-priorities][Fancy priorities]]
+  - [[#conf-mode][Conf-mode]]
+  - [[#iimpatient-mode][Iimpatient-mode]]
+  - [[#][]]
+- [[#development][Development]]
+  - [[#language-servers][Language Servers]]
+  - [[#lsp-treemacs][lsp-treemacs]]
+  - [[#lsp-ivy][lsp-ivy]]
+  - [[#python][Python]]
+- [[#term-modes][Term modes]]
+  - [[#term][Term]]
+  - [[#better-term-mode-colors][Better term-mode colors]]
+  - [[#vterm][vterm]]
+  - [[#eshell][eshell]]
+- [[#file-management][File management]]
+  - [[#dired][Dired]]
+  - [[#create-a-file-in-dired-using-a][Create a file in Dired using "a"]]
+- [[#resources][Resources]]
+- [[#affe---fuzzy-matching-without-fzf][affe - fuzzy matching without fzf]]
 
 * Auto Tangle
 ;; Automatically tangle our Emacs.org config file when we save it
 #+begin_src emacs-lisp
-  ;; Automatically tangle our Emacs.org config file when we save it
-  (defun my/tangle-config-on-save ()
-    "Tangle the Emacs configuration file if it's being saved."
-    (when (equal (file-truename (buffer-file-name))
-                 (file-truename (expand-file-name "~/.emacs.d/config.org")))
-      (org-babel-tangle)))
+    ;; Automatically tangle our Emacs.org config file when we save it
+    (defun my/tangle-config-on-save ()
+      "Tangle the Emacs configuration file if it's being saved."
+      (when (equal (file-truename (buffer-file-name))
+  		 (file-truename (expand-file-name "~/.emacs.d/config.org")))
+        (org-babel-tangle)))
 
 
-  (add-hook 'after-save-hook #'my/tangle-config-on-save)
+    (add-hook 'after-save-hook #'my/tangle-config-on-save)
+
+   (setq evil-want-keybinding nil)
+    (add-to-list 'load-path "~/.emacs.d/evil")
+  (require 'evil)
+  (evil-mode 1)
+
 #+end_src
 
 * Emacs Initialization
 ** For Macs
  Download brew install emacs-plus ;; Do not install regular emacs from brew
-
-** Package Sources
-To install packages, it is useful to c onfigure the package sources.
-
-#+BEGIN_SRC emacs-lisp
-    ;; Initializie package sources
-    (require 'package) ;; this might happen by default, but we have this just in case
-
-
-    ;; These are all the different package repositories
-    (setq package-archives '(("elpa" . "https://elpa.gnu.org/packages/")
-                             ("melpa" . "https://melpa.org/packages/")
-                             ("org" . "https://orgmode.org/elpa/")
-                             ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
-  (package-initialize)
-  (unless package-archive-contents
-   (package-refresh-contents))
-
-
-
-
-
-#+END_SRC
-
-** Package configurations
-To manage the package configuratiosn with ~use-package~ you must install it with the following code snippet.
-
-~use-package~ simplifies downloading packages.
-
-#+BEGIN_SRC emacs-lisp
-     (unless (package-installed-p 'use-package)
-      (package-install 'use-package))
-
-    (require 'use-package)
-  (setq use-package-always-ensure t)
-
-  (setq inhibit-startup-message t)
-
-#+END_SRC
-
-#+RESULTS:
-: t
 
 ** Correct $PATH
 exec-path-from-shell is a useful Emacs package that copies your shell's environment variables, such as PATH, to Emacs. This can help resolve issues where Emacs doesn't have the correct environment, leading to problems like "command not found."
@@ -78,11 +94,16 @@ exec-path-from-shell is a useful Emacs package that copies your shell's environm
 #+end_src
 ** Open up gtd file automatically
 #+begin_src emacs-lisp
-(setq initial-buffer-choice "~/org/gtd/gtd.org")
+    (setq initial-buffer-choice "~/org/gtd/gtd.org")
+
+    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+  (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+  (package-initialize)
 #+end_src
 * Defaults
 #+BEGIN_SRC emacs-lisp
   (setq-default
+   inhibit-start-up-message t                       ; Make it so stand up message doesn't show up 
    ad-redefinition-action 'accept                   ; Silence warnings for redefinition
    cursor-in-non-selected-windows t                 ; Hide the cursor in inactive windows
    display-time-default-load-average nil            ; Don't display load average
@@ -106,9 +127,9 @@ exec-path-from-shell is a useful Emacs package that copies your shell's environm
   (global-hl-line-mode)                             ; Hightlight current line
   (set-default-coding-systems 'utf-8)               ; Default to utf-8 encoding
   (show-paren-mode 1)                               ; Show the parent
-  (scroll-bar-mode -1)                               ; Disable visible scrollbar
+  ;(scroll-bar-mode -1)                               ; Disable visible scrollbar
   (tool-bar-mode -1)                                ; Disable the toolbar
-  (tooltip-mode -1)                                 ; Disable tooltips
+  ;(tooltip-mode -1)                                 ; Disable tooltips
   (set-fringe-mode 10)                              ; Give somebreathing room
 
   (menu-bar-mode -1)                                ; Disable the menu bar
@@ -180,10 +201,10 @@ This will be useful when we are editing lisp
 #+end_src
 ** Apperance
 #+BEGIN_SRC emacs-lisp
-(use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
+;(use-package doom-modeline
+ ; :ensure t
+ ; :init (doom-modeline-mode 1)
+ ; :custom ((doom-modeline-height 15)))
 
 (use-package all-the-icons
   :ensure t)
@@ -201,8 +222,13 @@ This will be useful when we are editing lisp
 
   (doom-themes-org-config))
 
+;      (use-package sqlite-mode-extras
+ ;       :after (org)
+  ;      :vc (:fetcher "github"
+   ;          :repo "xenodium/sqlite-mode-extras"
+    ;         :rev "main")
+    ;    :hook ((sqlite-mode . sqlite-extras-minor-mode)))
 #+END_SRC
-
 
 ** Ivy and Counsel
 
@@ -341,12 +367,10 @@ https://github.com/doomemacs/doomemacs/blob/develop/modules/config/default/%2Bev
       "d" 'dired
       "ps" '(counsel-projectile-rg :which-key "Search project using rg")
       "ms" 'magit-status
-      "nf" 'org-roam-node-find
-      "ni" 'org-roam-node-insert 
       "e" 'treemacs
       "cs" 'lsp-treemacs-symbols
-      "cj" 'lsp-ivy-workspace-symbol
-      "cr" 'lsp-find-references
+     ; "cj" 'lsp-ivy-workspace-symbol
+     ; "cr" 'lsp-find-references
       "ot" '(org-babel-tangle :which-key "Tangle Code") 
       "ol" '(org-insert-link :which-key "Insert/Edit Link")
       "oc" 'org-capture
@@ -364,16 +388,53 @@ https://github.com/doomemacs/doomemacs/blob/develop/modules/config/default/%2Bev
 Will give you a nice panel when you're using keybindings.
 
 It will let you know what keybinds are available as you are typing.
+Since Emacs 30, which-key is included 
 
 #+BEGIN_SRC emacs-lisp
-  (use-package which-key
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 0.3))
+  ;(use-package which-key
+  ;:init (which-key-mode)
+  ;:diminish which-key-mode
+  ;:config
+  ;(setq which-key-idle-delay 0.3))
+
+  (which-key-mode)
 
 
 #+END_SRC
+* Sqlite
+    Ever since Emacs 29, emacs has sqlite3 built in but you still need to enable it
+
+    Emacs does not automatically start sqlite-mode when you open a sqlite3 file, so that function is there to enable that
+#+BEGIN_SRC emacs-lisp
+        (use-package sqlite-mode
+          :config
+          ;; https://christiantietze.de/posts/2024/01/emacs-sqlite-mode-open-sqlite-files-automatically
+          (defun ar/sqlite-redirect-open ()
+            "Runs `sqlite-mode-open-file' on the file name visited by the
+        current buffer, killing it."
+
+            (let ((file-name buffer-file-name)
+                  (directory default-directory))
+              (kill-current-buffer)
+              (sqlite-mode-open-file file-name)
+              (setq default-directory directory)))
+
+          (add-to-list 'magic-mode-alist '("SQLite format 3\x00" . ar/sqlite-redirect-open)))
+
+     ;;     (use-package sqlite-mode-extras
+       ;     :hook ((sqlite-mode . sqlite-extras-minor-mode))))
+
+
+;      (use-package sqlite-mode-extras
+ ;       :after (org)
+  ;      :vc (:fetcher "github"
+   ;          :repo "xenodium/sqlite-mode-extras"
+    ;         :rev "main")
+    ;    :hook ((sqlite-mode . sqlite-extras-minor-mode)))
+#+END_SRC
+
+#+RESULTS:
+    
 
 * Projectile
 #+BEGIN_SRC emacs-lisp
@@ -449,6 +510,7 @@ you can press ? to see all the options you have in magit-status
               (set-face-attribute (car face) nil :font "Courier" :weight 'regular :height (cdr face)))
 
              ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+
             (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
             (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
             (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
@@ -481,7 +543,7 @@ you can press ? to see all the options you have in magit-status
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
               (require 'ob)
-              (require 'ob-python)
+             ; (require 'ob-python)
               (require 'lua-mode)
               (require 'ob-lua)
               (require 'ob-shell)
@@ -489,13 +551,13 @@ you can press ? to see all the options you have in magit-status
               (setq org-src-fontify-natively t)
               (setq org-src-tab-acts-natively t)
               (setq org-src-window-setup 'current-window)
-              (setq org-babel-python-command "python3") ; Set this to "python3" if your system uses "python3" as the command
+          ;    (setq org-babel-python-command "python3") ; Set this to "python3" if your system uses "python3" as the command
               (org-babel-do-load-languages
                'org-babel-load-languages
                '(
                  (java . t)
-                (conf . t)
-                (python . t)
+              ;  (conf . t)
+              ;  (python . t)
                 (lua . t)
                 (emacs-lisp . t)
                 (shell . t)
@@ -749,7 +811,7 @@ You can download ~pngpaste~ with
 
 (defun my/org-download-annotate (link)
   "Annotate LINK with the time of download."
-  (format "#+DOWNLOADED: %s @ %s\n#+ATTR_ORG: :width 700\n"
+  (format "#+DOWNLOADED: %s @ %s\n#+ATTR_ORG: :width 500\n"
           (if (equal link org-download-screenshot-file)
               "screenshot"
             link)
@@ -792,27 +854,12 @@ You can download ~pngpaste~ with
 #+END_SRC
 
 
-
-** org-roam
-#+begin_src emacs-lisp
-(use-package org-roam
-  :ensure t
-  :custom
-  (org-roam-directory "~/org/roam")
-  (org-roam-capture-templates
-   '(("d" "default" plain
-      "%?"
-      :target (file+head "${slug}.org" "#+title: ${title}\n")
-      :unnarrowed t)))
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n l" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert))
-  :config
-  (org-roam-setup))
-
-
-#+end_src
-
+** toc-org
+#+BEGIN_SRC emacs-lisp
+  (use-package toc-org
+    :commands toc-org-enable
+    :init (add-hook 'org-mode-hook 'toc-org-enable))
+    #+END_SRC
 ** org-autolist
 #+begin_src emacs-lisp
       (use-package org-autolist
@@ -854,7 +901,7 @@ this package will be used to get org-mode enabled in our orgmode files
 
 (add-hook 'html-mode-hook 'impatient-mode)
 #+end_src
-* 
+** 
 #+begin_src emacs-lisp
 (use-package calfw
   :ensure t
@@ -885,47 +932,23 @@ this package will be used to get org-mode enabled in our orgmode files
   #+RESULTS:
   : cfw:open-org-calendar
 
-* Beancount
-#+begin_src emacs-lisp
-(use-package beancount
-  :ensure t
-  :mode ("\\.beancount\\'" . beancount-mode))
-#+end_src
 
-
-* Skeletor
-#+begin_src emacs-lisp
-(use-package skeletor
-  :config
-  ;; Set the directory where your project templates will be stored.
-  (setq skeletor-user-directory "~/.emacs.d/skeletor-templates/")
-
-  ;; Set the default project location.
-  (setq skeletor-project-directory "~/Projects/Code"))
-#+end_src
-
-** Simple python project
-#+begin_src emacs-lisp
-  (skeletor-define-template "python-simple"
-    :default-license (rx bol "mit")
-  )
-#+end_src
 * Development
 
 ** Language Servers
 *** Initial LSP configuration
 #+begin_src emacs-lisp
 
-      (use-package lsp-mode
-        :commands (lsp lsp-deferred)
-        :init
-        (setq lsp-keymap-prefix "C-c l")
-        :config
-      (setq lsp-clients-lua-language-server-command '("/opt/homebrew/bin/lua-language-server"))
-        (lsp-enable-which-key-integration t)
-        :hook ((lua-mode . lsp-deferred)    ;; Enable Lua LSP
-         (python-mode . lsp-deferred)) ;; Enable Python LSP
-  )
+    ;  (use-package lsp-mode
+     ;   :commands (lsp lsp-deferred)
+      ;  :init
+     ;   (setq lsp-keymap-prefix "C-c l")
+    ;    :config
+   ;   (setq lsp-clients-lua-language-server-command ;'("/opt/homebrew/bin/lua-language-server"))
+  ;      (lsp-enable-which-key-integration t)
+   ;     :hook ((lua-mode . lsp-deferred)    ;; Enable Lua LSP
+    ;     (python-mode . lsp-deferred)) ;; Enable Python LSP
+ ; )
 
       ;(use-package lsp-mode
       ;  :ensure t
@@ -1009,7 +1032,7 @@ company mode is used for better auto completes
 This gives you away to find a specific symbol inside a project
 use ~<SPACE> cj~
 #+begin_src emacs-lisp
-  (use-package lsp-ivy)
+  ;(use-package lsp-ivy)
   
 #+end_src
 *** Typescript
@@ -1018,29 +1041,29 @@ Make sure to install the lsp server:
 ~npm i -g typescript-language-server; npm i -g typescript~
 
 #+begin_src emacs-lisp
-  (use-package typescript-mode
-  :mode "\\.ts\\'"
-  :hook (typescript-mode . lsp-deferred)
-  :config
-  (setq typescript-indent-level 2))
+  ;(use-package typescript-mode
+  ;:mode "\\.ts\\'"
+ ; :hook (typescript-mode . lsp-deferred)
+ ; :config
+ ; (setq typescript-indent-level 2))
 #+end_src
 
 *** Python
 #+begin_src emacs-lisp
-  (use-package python-mode
-    :ensure nil
+  ;(use-package python-mode
+   ; :ensure nil
     
-    :custom
-    (python-shell-interpreter "python3"))
+   ; :custom
+   ; (python-shell-interpreter "python3"))
 #+end_src
 
 #+begin_src emacs-lisp
-  (use-package lsp-pyright
-     :ensure t
-     :after lsp-mode
-     :hook (python-mode . (lambda ()
-                             (require 'lsp-pyright)
-                             (lsp))))  ; or lsp-deferred
+ ; (use-package lsp-pyright
+  ;   :ensure t
+   ;  :after lsp-mode
+  ;   :hook (python-mode . (lambda ()
+   ;                          (require 'lsp-pyright)
+    ;                         (lsp))))  ; or lsp-deferred
 
 
    ;(use-package lsp-pyright
@@ -1054,25 +1077,25 @@ Make sure to install the lsp server:
 #+end_src
 
 #+begin_src emacs-lisp
-  (use-package pyvenv
-    :config
-    (pyvenv-mode 1))
+ ; (use-package pyvenv
+  ;  :config
+   ; (pyvenv-mode 1))
 #+end_src
 
 *** lua
 #+begin_src emacs-lisp
-(use-package lua-mode
-  :ensure t
-  :mode "\\.lua\\'"
-  :interpreter "lua")
+;(use-package lua-mode
+ ; :ensure t
+ ; :mode "\\.lua\\'"
+ ; :interpreter "lua")
 #+end_src
 ** Python
 *** Elpy
 #+begin_src emacs-lisp
-(use-package elpy
-  :ensure t
-  :init
-  (elpy-enable)
+;(use-package elpy
+;  :ensure t
+;  :init
+;  (elpy-enable)
 #+end_src
 * Term modes
 ** Term
