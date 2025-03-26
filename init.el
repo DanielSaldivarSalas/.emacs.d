@@ -27,7 +27,7 @@
 	eshell-git-prompt eshell-prompt-extras eterm-256color
 	evil-collection evil-indent-plus evil-leader
 	evil-nerd-commenter evil-visual-mark-mode exec-path-from-shell
-	fireplace general helpful impatient-mode ivy-rich
+	fireplace general helpful impatient-mode
 	linum-relative lsp-ivy lsp-pyright lsp-treemacs lsp-ui
 	lua-mode magit neotree orderless org-autolist org-bullets
 	org-contacts org-contrib org-download org-fancy-priorities
